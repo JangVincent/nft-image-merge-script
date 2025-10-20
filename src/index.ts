@@ -8,20 +8,14 @@ async function main() {
 
   // Add NFT parts directories relative path
   const baseFolderMap = [
-    '../assets/bg',
-    '../assets/bottom',
-    '../assets/snapshot',
-    '../assets/pfp',
-    '../assets/message',
-    '../assets/paint',
+    '../assets/BG',
+    '../assets/Princess',
+    '../assets/Frame',
   ];
 
   const bg = [];
-  const bottom = [];
-  const snapshot = [];
-  const pfp = [];
-  const message = [];
-  const paint = [];
+  const princess = [];
+  const frame = [];
 
   for (const folder of baseFolderMap) {
     const dirPath = path.resolve(__dirname, folder);
@@ -30,16 +24,10 @@ async function main() {
     for (const file of files) {
       if (folder.includes('bg')) {
         bg.push(path.resolve(dirPath, file));
-      } else if (folder.includes('bottom')) {
-        bottom.push(path.resolve(dirPath, file));
-      } else if (folder.includes('snapshot')) {
-        snapshot.push(path.resolve(dirPath, file));
-      } else if (folder.includes('pfp')) {
-        pfp.push(path.resolve(dirPath, file));
-      } else if (folder.includes('message')) {
-        message.push(path.resolve(dirPath, file));
-      } else if (folder.includes('paint')) {
-        paint.push(path.resolve(dirPath, file));
+      } else if (folder.includes('princess')) {
+        princess.push(path.resolve(dirPath, file));
+      } else if (folder.includes('frame')) {
+        frame.push(path.resolve(dirPath, file));
       }
     }
   }
