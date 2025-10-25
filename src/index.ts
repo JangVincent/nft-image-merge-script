@@ -6,131 +6,148 @@ async function main() {
   const mergeImages = require('merge-images');
   const { Canvas, Image } = require('canvas');
 
-  // Add NFT parts directories relative path
-  const baseFolderMap = [
-    '../assets/BG',
-    '../assets/Princess',
-    '../assets/Frame',
+  // ======================
+  //  Layer Base Paths
+  // ======================
+  const baseFolder = {
+    bg: path.resolve(__dirname, '../assets/BG'),
+    princess: path.resolve(__dirname, '../assets/princess'),
+    frame: path.resolve(__dirname, '../assets/Frame'),
+  };
+
+  const outputDir = path.resolve(__dirname, '../output');
+  fs.mkdirSync(outputDir, { recursive: true });
+
+  // ======================
+  //  Weighted Tables
+  // ======================
+  const baseCharacters = [
+    { name: 'aomi.png', weight: 14 },
+    { name: 'sayaka.png', weight: 12 },
+    { name: 'yume.png', weight: 14 },
+    { name: 'shiori.png', weight: 12 },
+    { name: 'hana.png', weight: 10 },
+    { name: 'rika.png', weight: 10 },
+    { name: 'aoi.png', weight: 8 },
+    { name: 'yui.png', weight: 8 },
+    { name: 'reina.png', weight: 6 },
+    { name: 'shinobu.png', weight: 6 },
   ];
 
-  const bg = [];
-  const princess = [];
-  const frame = [];
+  const backgrounds = [
+    { name: '1-Nature.png', weight: 9 },
+    { name: '2-Wine.png', weight: 9 },
+    { name: '3-Earth.png', weight: 9 },
+    { name: '4-Darkness.png', weight: 9 },
+    { name: '5-Neutral.png', weight: 9 },
+    { name: '6-Beige.png', weight: 9 },
+    { name: '7-Breeze.png', weight: 9 },
+    { name: '8-Forest.png', weight: 9 },
+    { name: '9-Field.png', weight: 9 },
+    { name: '10-Steel.png', weight: 9 },
+    { name: '11-Special_Aurora.png', weight: 1 },
+    { name: '12-Special_Jungle.png', weight: 1 },
+    { name: '13-Special_Sun.png', weight: 1.5 },
+    { name: '14-Special_Lollipop.png', weight: 1.5 },
+    { name: '15-Special_Deep.png', weight: 1.5 },
+    { name: '16-Special_Jazz.png', weight: 1.5 },
+    { name: '17-Rare_Breeze.png', weight: 0.5 },
+    { name: '18-Rare_Ultraviolet.png', weight: 0.5 },
+    { name: '19-Rare_Gold.png', weight: 0.5 },
+  ];
 
-  for (const folder of baseFolderMap) {
-    const dirPath = path.resolve(__dirname, folder);
-    const files = fs.readdirSync(dirPath);
+  const frames = [
+    { name: 'Frame_0-None.png', weight: 40 },
+    { name: 'Frame_1-A.png', weight: 9 },
+    { name: 'Frame_2-B.png', weight: 9 },
+    { name: 'Frame_3-C.png', weight: 9 },
+    { name: 'Frame_4-D.png', weight: 6 },
+    { name: 'Frame_5-E.png', weight: 6 },
+    { name: 'Frame_6-F.png', weight: 6 },
+    { name: 'Frame_7-G.png', weight: 6 },
+    { name: 'Frame_8-H.png', weight: 3 },
+    { name: 'Frame_9-I.png', weight: 3 },
+    { name: 'Frame_10-J.png', weight: 3 },
+  ];
 
-    for (const file of files) {
-      if (folder.includes('bg')) {
-        bg.push(path.resolve(dirPath, file));
-      } else if (folder.includes('princess')) {
-        princess.push(path.resolve(dirPath, file));
-      } else if (folder.includes('frame')) {
-        frame.push(path.resolve(dirPath, file));
-      }
+  const utilities = [
+    { name: 'None', weight: 74 },
+    { name: 'Shield', weight: 3 },
+    { name: 'Mines', weight: 3 },
+    { name: 'Health', weight: 5 },
+    { name: 'Experience', weight: 5 },
+    { name: 'Gold', weight: 10 },
+  ];
+
+  // ======================
+  //  Weighted Random Helper
+  // ======================
+  function weightedRandom<T extends { name: string; weight: number }>(
+    items: T[],
+  ): T {
+    const total = items.reduce((sum, item) => sum + item.weight, 0);
+    let rand = Math.random() * total;
+    for (const item of items) {
+      rand -= item.weight;
+      if (rand <= 0) return item;
     }
+    return items[items.length - 1];
   }
 
-  // merge image bg > snapshot > paint > pfp > message > bottom
-  // with recursive merge
-  const attributes: { [index: string | number]: nftAttributeItem[] } = {};
-  const map = new Map<string, boolean>();
+  // ======================
+  //  Generation Loop
+  // ======================
+  const map = new Set<string>();
+  const TOTAL = 10000;
 
-  for (let i = 1; i <= 9140; i++) {
-    const rand1 = Math.floor(Math.random() * bg.length);
-    const rand2 = Math.floor(Math.random() * snapshot.length);
-    const rand3 = Math.floor(Math.random() * paint.length);
-    const rand4 = Math.floor(Math.random() * pfp.length);
-    const rand5 = Math.floor(Math.random() * message.length);
-    const rand6 = Math.floor(Math.random() * bottom.length);
+  for (let i = 1; i <= TOTAL; i++) {
+    const princess = weightedRandom(baseCharacters);
+    const bg = weightedRandom(backgrounds);
+    const frame = weightedRandom(frames);
+    const utility = weightedRandom(utilities);
 
-    const bgImage = bg[rand1];
-    const snapshotImage = snapshot[rand2];
-    const paintImage = paint[rand3];
-    const pfpImage = pfp[rand4];
-    const messageImage = message[rand5];
-    const bottomImage = bottom[rand6];
-
-    const key = `${rand1}-${rand2}-${rand3}-${rand4}-${rand5}-${rand6}`;
-
+    const key = `${princess.name}-${bg.name}-${frame.name}-${utility.name}`;
     if (map.has(key)) {
       i--;
       continue;
     }
+    map.add(key);
 
-    map.set(key, true);
-
-    // get each files
-    const bgLayer = fs.readFileSync(bgImage);
-    const snapshotLayer = fs.readFileSync(snapshotImage);
-    const paintLayer = fs.readFileSync(paintImage);
-    const pfpLayer = fs.readFileSync(pfpImage);
-    const messageLayer = fs.readFileSync(messageImage);
-    const bottomLayer = fs.readFileSync(bottomImage);
-
-    const mergedImage = await mergeImages(
+    // Image merge order: BG → Princess → Frame
+    const merged = await mergeImages(
       [
-        { src: bgLayer },
-        { src: snapshotLayer },
-        { src: paintLayer },
-        { src: pfpLayer },
-        { src: messageLayer },
-        { src: bottomLayer },
+        { src: path.join(baseFolder.bg, bg.name) },
+        { src: path.join(baseFolder.princess, princess.name) },
+        { src: path.join(baseFolder.frame, frame.name) },
       ],
-      {
-        Canvas: Canvas,
-        Image: Image,
-      },
+      { Canvas, Image },
     );
 
     fs.writeFileSync(
-      path.resolve(__dirname, `../output/${i}.png`),
-      mergedImage.replace(/^data:image\/png;base64,/, ''),
+      path.join(outputDir, `${i}.png`),
+      merged.replace(/^data:image\/png;base64,/, ''),
       'base64',
     );
 
-    attributes[i] = [
-      {
-        trait_type: 'Background',
-        value: bgImage.split('/').pop() || '',
-      },
-      {
-        trait_type: 'Snapshot',
-        value: snapshotImage.split('/').pop() || '',
-      },
-      {
-        trait_type: 'Paint',
-        value: paintImage.split('/').pop() || '',
-      },
-      {
-        trait_type: 'PFP',
-        value: pfpImage.split('/').pop() || '',
-      },
-      {
-        trait_type: 'Message',
-        value: messageImage.split('/').pop() || '',
-      },
-      {
-        trait_type: 'Bottom',
-        value: bottomImage.split('/').pop() || '',
-      },
+    const metadata: nftAttributeItem[] = [
+      { trait_type: 'Background', value: bg.name },
+      { trait_type: 'Princess', value: princess.name },
+      { trait_type: 'Frame', value: frame.name },
+      { trait_type: 'Utility', value: utility.name },
     ];
 
-    console.log('token Id', i);
+    fs.writeFileSync(
+      path.join(outputDir, `${i}.json`),
+      JSON.stringify(metadata, null, 2),
+    );
+
+    if (i % 100 === 0) console.log(`Generated ${i}/${TOTAL}`);
   }
 
-  fs.writeFileSync(
-    path.resolve(__dirname, `../output/metadata.json`),
-    JSON.stringify(attributes, null, 2),
-  );
+  console.log('✅ All 10,000 NFTs generated successfully!');
 }
 
-main()
-  .then(async () => {
-    console.log('✅ Script run Success');
-  })
-  .catch(async (e) => {
-    console.error(e);
-    process.exit(1);
-  });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
